@@ -95,3 +95,22 @@ void readKeypad(unsigned int *keypadValue)
     }
     *keypadValue = 0; // No key pressed
 }
+
+// Activate the keypad and deactivate the LCD (thanks to 74HC245 bus control)
+void activateKeyPadAndDeactivateLCD(void)
+{
+    // deactivate the 74HC245 bus of the LCD
+    AT91C_BASE_PIOC->PIO_SODR = (1 << PIN_74HC245_LCD_G); // LCD 74HC245 OFF (G=1)
+    // activate the 74HC245 of the keypad
+    AT91C_BASE_PIOD->PIO_CODR = (1 << PIN_74HC245_KB_G);
+}
+
+// Deactivate the keypad and activate the LCD (thanks to 74HC245 bus control)
+void deactivateKeyPadAndActivateLCD(void)
+{
+    // deactivate the 74HC245 of the keypad
+    AT91C_BASE_PIOD->PIO_SODR = (1 << PIN_74HC245_KB_G); // Keypad 74HC245 OFF (G=1)
+    // activate the 74HC245 of the LCD
+    AT91C_BASE_PIOC->PIO_CODR = (1 << PIN_74HC245_LCD_G);
+}
+

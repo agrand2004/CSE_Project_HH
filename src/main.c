@@ -7,107 +7,12 @@
 #include "temp_sensor_function.h"
 #include "photoresistor_function.h"
 #include "servomotor_function.h"
-
-#define DELAY_MS 1000 // 1000ms delay for reading temperature
+#include "systick.h"
+#include "utils.h"
 
 unsigned int keypadValue = 0;
 unsigned int lastKeypadValue = 0;
-unsigned int tickCounter = 0;
 float photoValue = 0;
-
-void initSysTick(uint32_t ticks)
-{
-    // Disable SysTick during setup
-    SysTick->CTRL = 0;
-
-    // Set reload register (subtract 1 because counter counts from LOAD to 0)
-    SysTick->LOAD = ticks - 1;
-
-    // Clear current value register
-    SysTick->VAL = 0;
-
-    // Enable SysTick with processor clock and interrupt
-    // CTRL bits: [0]=ENABLE, [1]=TICKINT (interrupt enable), [2]=CLKSOURCE (processor clock)
-    SysTick->CTRL = SysTick_CTRL_ENABLE_Msk |
-                    SysTick_CTRL_TICKINT_Msk |
-                    SysTick_CTRL_CLKSOURCE_Msk;
-}
-
-// Convert float to string (simple version without sprintf)
-void floatToString(float value, char *buffer)
-{
-    int intPart = (int)value;
-    int decPart = (int)((value - intPart) * 10);
-    if (decPart < 0)
-        decPart = -decPart;
-
-    // Convert integer part
-    int i = 0;
-    if (intPart < 0)
-    {
-        buffer[i++] = '-';
-        intPart = -intPart;
-    }
-
-    if (intPart == 0)
-    {
-        buffer[i++] = '0';
-    }
-    else
-    {
-        char temp[10];
-        int j = 0;
-        while (intPart > 0)
-        {
-            temp[j++] = '0' + (intPart % 10);
-            intPart /= 10;
-        }
-        while (j > 0)
-        {
-            buffer[i++] = temp[--j];
-        }
-    }
-
-    // Add decimal part
-    buffer[i++] = '.';
-    buffer[i++] = '0' + decPart;
-    buffer[i] = '\0';
-}
-
-// ===== Delay function =====
-void delay(unsigned int us)
-{
-    for (int i = 0; i < us; i++)
-        asm("nop");
-}
-
-void activateKeyPadAndDeactivateLCD(void)
-{
-    // deactivate the 74HC245 bus of the LCD
-    AT91C_BASE_PIOC->PIO_SODR = (1 << PIN_74HC245_LCD_G); // LCD 74HC245 OFF (G=1)
-    // activate the 74HC245 of the keypad
-    AT91C_BASE_PIOD->PIO_CODR = (1 << PIN_74HC245_KB_G);
-}
-
-void deactivateKeyPadAndActivateLCD(void)
-{
-    // deactivate the 74HC245 of the keypad
-    AT91C_BASE_PIOD->PIO_SODR = (1 << PIN_74HC245_KB_G); // Keypad 74HC245 OFF (G=1)
-    // activate the 74HC245 of the LCD
-    AT91C_BASE_PIOC->PIO_CODR = (1 << PIN_74HC245_LCD_G);
-}
-
-void SysTick_Handler(void)
-{
-    tickCounter++;
-
-    if (tickCounter >= DELAY_MS / 100)
-    {
-        tickCounter = 0;
-        readTempSensor();
-        photoValue = readPhotoresistor();
-    }
-}
 
 int main(void)
 {

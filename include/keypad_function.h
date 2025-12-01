@@ -9,4 +9,8 @@ void initKeypad(void);
 void reconfigureKeypadPins(void);
 void readKeypad(unsigned int *keypadValue);
 
+// Keypad and LCD functions
+void activateKeyPadAndDeactivateLCD(void);
+void deactivateKeyPadAndActivateLCD(void);
+
 #endif // KEYPAD_FUNCTION_H
