@@ -9,16 +9,14 @@
 #include "servomotor_function.h"
 #include "systick.h"
 #include "utils.h"
-
-unsigned int keypadValue = 0;
-unsigned int lastKeypadValue = 0;
-float photoValue = 0;
+#include "greenhouse.h"
+#include <string.h>
 
 int main(void)
 {
     // Initialize system
     SystemInit();
-    initSysTick(4200000); // 0.1s tick at 42MHz
+    initSysTick(8400000); // 0.1s tick at 84MHz
 
     initKeypad();
     lcdInit();
@@ -31,6 +29,8 @@ int main(void)
     lcdClearText();
     lcdGotoXY(0, 0);
 
+    initGreenHouse();
+
     // Variables for temperature and photoresistor reading
     char tempBuffer[20];
     char photoBuffer[20];
@@ -38,38 +38,54 @@ int main(void)
     // Main loop
     while (1)
     {
-        if (tempDataReady)
+        // Display the appropriate screen
+        displayScreen();
+
+        if (tempDataReady && greenhouse.currentScreen == MAIN_SCREEN)
         {
             // Read temperature
             float temperature = getTemperature();
+            greenhouse.temperature = temperature;
+
+            // Display photoresistor value on LCD
+            lcdGotoXY(7, 1); // Return to first line
+            floatToString(greenhouse.photoValue, photoBuffer);
+            lcdPuts(photoBuffer);
+            lcdPuts("V");
+            lcdFinishLine(1, 7 + strlen(photoBuffer) + 1); // Clear rest of line
 
             // Display temperature on LCD
             deactivateKeyPadAndActivateLCD();
-            lcdGotoXY(0, 1); // Second line
-            lcdPuts("Temp: ");
+            lcdGotoXY(13, 2); // Second line
             floatToString(temperature, tempBuffer);
             lcdPuts(tempBuffer);
             lcdPuts("C");
+            lcdFinishLine(2, 13 + strlen(tempBuffer) + 1); // Clear rest of line
 
-            // Display photoresistor value on LCD
-            lcdGotoXY(0, 0); // Return to first line
-            lcdPuts("Light: ");
-            floatToString(photoValue, photoBuffer);
-            lcdPuts(photoBuffer);
-            lcdPuts("V");
+            displayDateTime();
         }
 
         // Read keypad
         activateKeyPadAndDeactivateLCD();
-        readKeypad(&keypadValue);
+        readKeypad(&greenhouse.keypadValue);
 
-        if (keypadValue != 0 && keypadValue != lastKeypadValue)
+        if (greenhouse.keypadValue != 0 && greenhouse.keypadValue != greenhouse.lastKeypadValue)
         {
-            servomotorWriteValue((keypadValue - 1) * 10); // Map keypad value to servo angle (0-180 degrees)
+            if (greenhouse.keypadValue == 12)
+            {
+                // Switch to date/time configuration screen
+                greenhouse.currentScreen = DATE_TIME_CONFIGURATION;
+            }
+            else if (greenhouse.keypadValue == 10)
+            {
+                // Switch back to main screen
+                greenhouse.currentScreen = MAIN_SCREEN;
+            }
+            servomotorWriteValue((greenhouse.keypadValue - 1) * 10); // Map keypad value to servo angle (0-180 degrees)
         }
-        else if (keypadValue == 0)
+        else if (greenhouse.keypadValue == 0)
         {
-            lastKeypadValue = 0;
+            greenhouse.lastKeypadValue = 0;
         }
 
         delay(50); // Debouncing delay

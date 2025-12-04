@@ -5,13 +5,13 @@
 #include "systick.h"
 #include "temp_sensor_function.h"
 #include "photoresistor_function.h"
+#include "greenhouse.h"
 
-#define DELAY_MS 1000 // 1000ms delay for reading temperature
-
+static unsigned int tickCounterHalfSecond = 0;
 static unsigned int tickCounter = 0;
 
 // Extern variable updated by SysTick ISR and displayed in main
-extern float photoValue;
+extern GreenHouse greenhouse;
 
 void initSysTick(uint32_t ticks)
 {
@@ -31,14 +31,24 @@ void initSysTick(uint32_t ticks)
                     SysTick_CTRL_CLKSOURCE_Msk;
 }
 
+// Function executed every SysTick interrupt (0.1s)
 void SysTick_Handler(void)
 {
     tickCounter++;
+    tickCounterHalfSecond++;
 
-    if (tickCounter >= DELAY_MS / 100)
-    {
-        tickCounter = 0;
+    // Read sensor at 0.5 second interval (5 ticks of 0.1s)
+    if (tickCounterHalfSecond >= 5)
+    { // 0.5 second elapsed
         readTempSensor();
-        photoValue = readPhotoresistor();
+        greenhouse.photoValue = readPhotoresistor();
+        tickCounterHalfSecond = 0; // Reset half-second counter
+    }
+
+    // Update date/time and reset counter at 1 second (10 ticks of 0.1s)
+    if (tickCounter >= 10)
+    { // 1 second elapsed
+        tickCounter = 0;
+        updateDateTime();
     }
 }

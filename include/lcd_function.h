@@ -30,5 +30,6 @@ void lcdPutc(char c);
 void lcdPuts(const char *str);
 void lcdPrintAt(unsigned char x, unsigned char y, const char *str);
 void lcdClearLine(unsigned char line);
+void lcdFinishLine(unsigned char line, int currentPos);
 
 #endif // LCD_FUNCTION_H

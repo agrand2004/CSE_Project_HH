@@ -455,3 +455,12 @@ void lcdClearLine(unsigned char line)
         lcdPutc(' ');
     }
 }
+
+void lcdFinishLine(unsigned char line, int currentPos)
+{
+    lcdGotoXY(currentPos, line);
+    for (unsigned char i = currentPos; i < LCD_COLS; i++)
+    {
+        lcdPutc(' ');
+    }
+}
