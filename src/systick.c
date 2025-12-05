@@ -43,6 +43,7 @@ void SysTick_Handler(void)
         readTempSensor();
         greenhouse.photoValue = readPhotoresistor();
         tickCounterHalfSecond = 0; // Reset half-second counter
+        greenhouse.needDisplayUpdate = TRUE; // Indicate display needs update
     }
 
     // Update date/time and reset counter at 1 second (10 ticks of 0.1s)
@@ -50,5 +51,6 @@ void SysTick_Handler(void)
     { // 1 second elapsed
         tickCounter = 0;
         updateDateTime();
+        greenhouse.needDisplayUpdate = TRUE; // Indicate display needs update
     }
 }

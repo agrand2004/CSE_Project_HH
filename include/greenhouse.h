@@ -4,12 +4,17 @@
 #include <stdint.h>
 #include <string.h>
 #include "datetime.h"
+#include "lcd_function.h"
+#include "utils.h"
+#include "temp_sensor_function.h"
+#include "photoresistor_function.h"
+#include "keypad_function.h"
 
 // Enum for screen types
 typedef enum
 {
     MAIN_SCREEN,
-    DATE_TIME_CONFIGURATION,
+    DATE_TIME_CONFIGURATION_SCREEN,
     NONE
     // Add more screens here as needed
 } ScreenType;
@@ -38,6 +43,8 @@ typedef struct
     // Calendar/Date/Time variables
     DateTime currentDateTime;
     Boolean inTimestampConfiguration;
+
+    Boolean needDisplayUpdate;
 } GreenHouse;
 
 // Global greenhouse instance

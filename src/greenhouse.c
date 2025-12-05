@@ -1,6 +1,4 @@
 #include "greenhouse.h"
-#include "lcd_function.h"
-#include "utils.h"
 
 // Global greenhouse instance
 GreenHouse greenhouse;
@@ -20,45 +18,93 @@ void initGreenHouse(void)
     greenhouse.currentDateTime.month = 0;
     greenhouse.currentDateTime.year = 0;
     greenhouse.inTimestampConfiguration = FALSE;
+    greenhouse.needDisplayUpdate = TRUE;
+}
+
+void displayMainScreen(void)
+{
+    // Variables for temperature and photoresistor reading
+    char tempBuffer[20];
+    char photoBuffer[20];
+
+    if (tempDataReady)
+    {
+        // Read temperature
+        float temperature = getTemperature();
+        greenhouse.temperature = temperature;
+
+        // Display temperature on LCD
+        lcdPrintAt(0, 2, "Temperature: ");
+        lcdGotoXY(13, 2); // Second line
+        floatToString(temperature, tempBuffer);
+        lcdPuts(tempBuffer);
+        lcdPuts("C");
+        lcdFinishLine(2, 13 + strlen(tempBuffer) + 1); // Clear rest of line
+    }
+
+    // Display photoresistor value on LCD
+    // TODO: remove this when no longer needed
+    lcdPrintAt(0, 1, "Light: ");
+    lcdGotoXY(7, 1); // Return to first line
+    floatToString(greenhouse.photoValue, photoBuffer);
+    lcdPuts(photoBuffer);
+    lcdPuts("V");
+    lcdFinishLine(1, 7 + strlen(photoBuffer) + 1); // Clear rest of line
+
+    // Display the date and time
+    displayDateTime();
+}
+
+void displayDateTimeConfigurationScreen(void)
+{
+    lcdPrintAt(0, 0, "Set Date:");
+    lcdGotoXY(0, 1);
+    lcdPuts("DD/MM/YYYY");
 }
 
 // Display screen based on current screen type
 // This function checks if the screen has changed and only re-renders if needed
 void displayScreen(void)
 {
-    // Only re-render if the screen has changed
-    if (greenhouse.currentScreen == greenhouse.lastScreenDisplay)
+    // Only re-render if the screen has changed or if an update is needed
+    if (!greenhouse.needDisplayUpdate && greenhouse.currentScreen == greenhouse.lastScreenDisplay)
     {
         return;
     }
 
-    // Update the last displayed screen
-    greenhouse.lastScreenDisplay = greenhouse.currentScreen;
+    if (greenhouse.currentScreen != greenhouse.lastScreenDisplay)
+    {
+        lcdClearText();
+        lcdGotoXY(0, 0);
+        // Update the last displayed screen
+        greenhouse.lastScreenDisplay = greenhouse.currentScreen;
+    }
+    if (greenhouse.needDisplayUpdate)
+    {
+        greenhouse.needDisplayUpdate = FALSE;
+    }
 
-    // Clear the screen for fresh display
-    lcdClearText();
-    lcdGotoXY(0, 0);
+    // Ensure LCD is active
+    deactivateKeyPadAndActivateLCD();
 
     // Display based on current screen type
     switch (greenhouse.currentScreen)
     {
     case MAIN_SCREEN:
         // Display main screen content
-        // Temperature on line 0, Light on line 1, etc.
-        displayDateTime();
-        lcdPrintAt(0, 1, "Light: ");
-        lcdPrintAt(0, 2, "Temperature: ");
+        displayMainScreen();
         break;
-    case DATE_TIME_CONFIGURATION:
-        // Display date configuration screen
-        lcdPrintAt(0, 0, "Set Date:");
-        lcdGotoXY(0, 1);
-        lcdPuts("DD/MM/YYYY");
+    case DATE_TIME_CONFIGURATION_SCREEN:
+        // Display date/time configuration screen content
+        displayDateTimeConfigurationScreen();
         break;
     default:
         lcdPrintAt(0, 0, "Unknown Screen");
         break;
     }
+
+    // Reactivate keypad after updating display
+    activateKeyPadAndDeactivateLCD();
 }
 
 void displayDateTime(void)

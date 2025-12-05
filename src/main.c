@@ -31,39 +31,35 @@ int main(void)
 
     initGreenHouse();
 
-    // Variables for temperature and photoresistor reading
-    char tempBuffer[20];
-    char photoBuffer[20];
-
     // Main loop
     while (1)
     {
         // Display the appropriate screen
         displayScreen();
 
-        if (tempDataReady && greenhouse.currentScreen == MAIN_SCREEN)
-        {
-            // Read temperature
-            float temperature = getTemperature();
-            greenhouse.temperature = temperature;
+        // if (tempDataReady && greenhouse.currentScreen == MAIN_SCREEN)
+        // {
+        //     // Read temperature
+        //     float temperature = getTemperature();
+        //     greenhouse.temperature = temperature;
 
-            // Display photoresistor value on LCD
-            lcdGotoXY(7, 1); // Return to first line
-            floatToString(greenhouse.photoValue, photoBuffer);
-            lcdPuts(photoBuffer);
-            lcdPuts("V");
-            lcdFinishLine(1, 7 + strlen(photoBuffer) + 1); // Clear rest of line
+        //     // Display photoresistor value on LCD
+        //     lcdGotoXY(7, 1); // Return to first line
+        //     floatToString(greenhouse.photoValue, photoBuffer);
+        //     lcdPuts(photoBuffer);
+        //     lcdPuts("V");
+        //     lcdFinishLine(1, 7 + strlen(photoBuffer) + 1); // Clear rest of line
 
-            // Display temperature on LCD
-            deactivateKeyPadAndActivateLCD();
-            lcdGotoXY(13, 2); // Second line
-            floatToString(temperature, tempBuffer);
-            lcdPuts(tempBuffer);
-            lcdPuts("C");
-            lcdFinishLine(2, 13 + strlen(tempBuffer) + 1); // Clear rest of line
+        //     // Display temperature on LCD
+        //     deactivateKeyPadAndActivateLCD();
+        //     lcdGotoXY(13, 2); // Second line
+        //     floatToString(temperature, tempBuffer);
+        //     lcdPuts(tempBuffer);
+        //     lcdPuts("C");
+        //     lcdFinishLine(2, 13 + strlen(tempBuffer) + 1); // Clear rest of line
 
-            displayDateTime();
-        }
+        //     displayDateTime();
+        // }
 
         // Read keypad
         activateKeyPadAndDeactivateLCD();
@@ -74,7 +70,7 @@ int main(void)
             if (greenhouse.keypadValue == 12)
             {
                 // Switch to date/time configuration screen
-                greenhouse.currentScreen = DATE_TIME_CONFIGURATION;
+                greenhouse.currentScreen = DATE_TIME_CONFIGURATION_SCREEN;
             }
             else if (greenhouse.keypadValue == 10)
             {
