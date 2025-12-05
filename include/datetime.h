@@ -17,8 +17,8 @@ typedef struct
 // Update the date and time of the greenhouse
 void updateDateTime(void);
 
-// ask for the user to write the date and time
-void buildDateTime(void); //TODO
+// Configure the date and time through user input
+void configureDateTime(void);
 
 // Add one second to the current date/time
 void addOneSecond(void);

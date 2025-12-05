@@ -34,7 +34,7 @@ void initSysTick(uint32_t ticks)
 // Function executed every SysTick interrupt (0.1s)
 void SysTick_Handler(void)
 {
-    if (greenhouse.inTimestampConfiguration)
+    if (greenhouse.currentScreen == DATE_TIME_CONFIGURATION_SCREEN)
     {
         return;
     }

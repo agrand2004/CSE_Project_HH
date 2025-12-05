@@ -1,4 +1,10 @@
 #include "greenhouse.h"
+#include "lcd_function.h"
+#include "utils.h"
+#include "temp_sensor_function.h"
+#include "keypad_function.h"
+#include "datetime.h"
+#include <string.h>
 
 // Global greenhouse instance
 GreenHouse greenhouse;
@@ -17,8 +23,21 @@ void initGreenHouse(void)
     greenhouse.currentDateTime.day = 0;
     greenhouse.currentDateTime.month = 0;
     greenhouse.currentDateTime.year = 0;
-    greenhouse.inTimestampConfiguration = FALSE;
     greenhouse.needDisplayUpdate = TRUE;
+}
+
+void displayDateTime(void)
+{
+    char timeBuffer[20];
+    char dateBuffer[20];
+
+    timeToString(greenhouse.currentDateTime, timeBuffer, sizeof(timeBuffer));
+    dateToString(greenhouse.currentDateTime, dateBuffer, sizeof(dateBuffer));
+
+    // Display on LCD
+    lcdPrintAt(0, 0, dateBuffer);  // Date on line 0
+    lcdPrintAt(22, 0, timeBuffer); // Time on line 0 (half way)
+    lcdPrintAt(0, LCD_ROWS - 1, "#: Date and Time configuration"); // Instruction on last line
 }
 
 void displayMainScreen(void)
@@ -55,14 +74,6 @@ void displayMainScreen(void)
     displayDateTime();
 }
 
-void displayDateTimeConfigurationScreen(void)
-{
-    lcdPrintAt(0, 0, "Set Date:");
-    lcdGotoXY(0, 1);
-    lcdPuts("DD/MM/YYYY");
-    lcdPrintAt(0, LCD_ROWS - 1, "*: Main Menu"); // Instruction on last line
-}
-
 // Display screen based on current screen type
 // This function checks if the screen has changed and only re-renders if needed
 void displayScreen(void)
@@ -97,7 +108,7 @@ void displayScreen(void)
         break;
     case DATE_TIME_CONFIGURATION_SCREEN:
         // Display date/time configuration screen content
-        displayDateTimeConfigurationScreen();
+        configureDateTime();
         break;
     default:
         lcdPrintAt(0, 0, "Unknown Screen");
@@ -107,21 +118,6 @@ void displayScreen(void)
     // Reactivate keypad after updating display
     activateKeyPadAndDeactivateLCD();
 }
-
-void displayDateTime(void)
-{
-    char timeBuffer[20];
-    char dateBuffer[20];
-
-    timeToString(greenhouse.currentDateTime, timeBuffer, sizeof(timeBuffer));
-    dateToString(greenhouse.currentDateTime, dateBuffer, sizeof(dateBuffer));
-
-    // Display on LCD
-    lcdPrintAt(0, 0, dateBuffer);  // Date on line 0
-    lcdPrintAt(22, 0, timeBuffer); // Time on line 0 (half way)
-    lcdPrintAt(0, LCD_ROWS - 1, "#: Date and Time configuration"); // Instruction on last line
-}
-
 
 void handleKeypadInput(void)
 {
