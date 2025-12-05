@@ -60,6 +60,7 @@ void displayDateTimeConfigurationScreen(void)
     lcdPrintAt(0, 0, "Set Date:");
     lcdGotoXY(0, 1);
     lcdPuts("DD/MM/YYYY");
+    lcdPrintAt(0, LCD_ROWS - 1, "*: Main Menu"); // Instruction on last line
 }
 
 // Display screen based on current screen type
@@ -118,4 +119,31 @@ void displayDateTime(void)
     // Display on LCD
     lcdPrintAt(0, 0, dateBuffer);  // Date on line 0
     lcdPrintAt(22, 0, timeBuffer); // Time on line 0 (half way)
+    lcdPrintAt(0, LCD_ROWS - 1, "#: Date and Time configuration"); // Instruction on last line
+}
+
+
+void handleKeypadInput(void)
+{
+    if (greenhouse.keypadValue == 0 || greenhouse.keypadValue == greenhouse.lastKeypadValue)
+    {
+        return; // No new key press
+    }
+    if (greenhouse.keypadValue == 0)
+    {
+        greenhouse.lastKeypadValue = 0;
+        return; // No key pressed
+    }
+
+    if (greenhouse.keypadValue == 12 && greenhouse.currentScreen != DATE_TIME_CONFIGURATION_SCREEN)
+    {
+        // Switch to date/time configuration screen
+        greenhouse.currentScreen = DATE_TIME_CONFIGURATION_SCREEN;
+    }
+    else if (greenhouse.keypadValue == 10 && greenhouse.currentScreen != MAIN_SCREEN)
+    {
+        // Switch back to main screen
+        greenhouse.currentScreen = MAIN_SCREEN;
+    }
+    servomotorWriteValue((greenhouse.keypadValue - 1) * 10); // Map keypad value to servo angle (0-180 degrees)
 }

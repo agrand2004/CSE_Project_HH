@@ -113,4 +113,3 @@ void deactivateKeyPadAndActivateLCD(void)
     // activate the 74HC245 of the LCD
     AT91C_BASE_PIOC->PIO_CODR = (1 << PIN_74HC245_LCD_G);
 }
-

@@ -9,6 +9,8 @@
 #include "temp_sensor_function.h"
 #include "photoresistor_function.h"
 #include "keypad_function.h"
+#include "servomotor_function.h"
+#include "pins.h"
 
 // Enum for screen types
 typedef enum
@@ -53,6 +55,6 @@ extern GreenHouse greenhouse;
 // Display functions
 void initGreenHouse(void);
 void displayScreen(void);
-void displayDateTime(void);
+void handleKeypadInput(void);
 
 #endif // GREENHOUSE_H
